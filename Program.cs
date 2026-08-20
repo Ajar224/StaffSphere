@@ -1,5 +1,5 @@
-﻿using MiniHRMS.Models;
-using MiniHRMS.Services;
+﻿using StaffSphere.Models;
+using StaffSphere.Services;
 
 var employeeService = new EmployeeService();
 var attendanceService = new AttendanceService();
@@ -7,7 +7,7 @@ bool running = true;
 
 while (running)
 {
-    Console.WriteLine("\n===== Mini HRMS =====");
+    Console.WriteLine("\n===== StaffSphere =====");
     Console.WriteLine("1. Add Employee");
     Console.WriteLine("2. View All Employees");
     Console.WriteLine("3. Update Employee");

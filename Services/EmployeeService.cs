@@ -1,8 +1,8 @@
 using Microsoft.Data.SqlClient;
-using MiniHRMS.Data;
-using MiniHRMS.Models;
+using StaffSphere.Data;
+using StaffSphere.Models;
 
-namespace MiniHRMS.Services
+namespace StaffSphere.Services
 {
     public class EmployeeService
     {
@@ -78,22 +78,23 @@ namespace MiniHRMS.Services
             else
                 Console.WriteLine("❌ No employee found with that ID.");
         }
+
         public void DeleteEmployee(int id)
-{
-    using var connection = DbConnection.GetConnection();
-    connection.Open();
+        {
+            using var connection = DbConnection.GetConnection();
+            connection.Open();
 
-    string query = "DELETE FROM Employees WHERE EmployeeId = @EmployeeId";
+            string query = "DELETE FROM Employees WHERE EmployeeId = @EmployeeId";
 
-    using var command = new SqlCommand(query, connection);
-    command.Parameters.AddWithValue("@EmployeeId", id);
+            using var command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@EmployeeId", id);
 
-    int rowsAffected = command.ExecuteNonQuery();
+            int rowsAffected = command.ExecuteNonQuery();
 
-    if (rowsAffected > 0)
-        Console.WriteLine("✅ Employee deleted successfully!");
-    else
-        Console.WriteLine("❌ No employee found with that ID.");
-}
+            if (rowsAffected > 0)
+                Console.WriteLine("✅ Employee deleted successfully!");
+            else
+                Console.WriteLine("❌ No employee found with that ID.");
+        }
     }
 }

@@ -1,4 +1,4 @@
-namespace MiniHRMS.Models
+namespace StaffSphere.Models
 {
     public class Employee
     {

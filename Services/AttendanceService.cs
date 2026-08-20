@@ -1,8 +1,8 @@
 using Microsoft.Data.SqlClient;
-using MiniHRMS.Data;
-using MiniHRMS.Models;
+using StaffSphere.Data;
+using StaffSphere.Models;
 
-namespace MiniHRMS.Services
+namespace StaffSphere.Services
 {
     public class AttendanceService
     {
