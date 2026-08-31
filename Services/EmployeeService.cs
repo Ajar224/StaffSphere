@@ -1,100 +1,62 @@
-using Microsoft.Data.SqlClient;
-using StaffSphere.Data;
+using AutoMapper;
+using StaffSphere.DTOs;
 using StaffSphere.Models;
+using StaffSphere.Repositories;
 
 namespace StaffSphere.Services
 {
-    public class EmployeeService
+    public class EmployeeService : IEmployeeService
     {
-        public void AddEmployee(Employee emp)
+        private readonly IEmployeeRepository _repository;
+        private readonly IMapper _mapper;
+
+        public EmployeeService(IEmployeeRepository repository, IMapper mapper)
         {
-            using var connection = DbConnection.GetConnection();
-            connection.Open();
-
-            string query = @"INSERT INTO Employees (FullName, Department, Designation, JoiningDate, Email) 
-                              VALUES (@FullName, @Department, @Designation, @JoiningDate, @Email)";
-
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@FullName", emp.FullName);
-            command.Parameters.AddWithValue("@Department", emp.Department);
-            command.Parameters.AddWithValue("@Designation", emp.Designation);
-            command.Parameters.AddWithValue("@JoiningDate", emp.JoiningDate);
-            command.Parameters.AddWithValue("@Email", emp.Email);
-
-            command.ExecuteNonQuery();
-            Console.WriteLine("✅ Employee added successfully!");
+            _repository = repository;
+            _mapper = mapper;
         }
 
-        public List<Employee> GetAllEmployees()
+        public async Task<List<EmployeeDto>> GetAllEmployeesAsync()
         {
-            var employees = new List<Employee>();
-
-            using var connection = DbConnection.GetConnection();
-            connection.Open();
-
-            string query = "SELECT * FROM Employees";
-            using var command = new SqlCommand(query, connection);
-            using var reader = command.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var emp = new Employee
-                {
-                    EmployeeId = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
-                    FullName = reader.GetString(reader.GetOrdinal("FullName")),
-                    Department = reader.GetString(reader.GetOrdinal("Department")),
-                    Designation = reader.GetString(reader.GetOrdinal("Designation")),
-                    JoiningDate = reader.GetDateTime(reader.GetOrdinal("JoiningDate")),
-                    Email = reader.GetString(reader.GetOrdinal("Email"))
-                };
-                employees.Add(emp);
-            }
-
-            return employees;
+            var employees = await _repository.GetAllAsync();
+            return _mapper.Map<List<EmployeeDto>>(employees);
         }
 
-        public void UpdateEmployee(int id, Employee emp)
+        public async Task<EmployeeDto?> GetEmployeeByIdAsync(int id)
         {
-            using var connection = DbConnection.GetConnection();
-            connection.Open();
-
-            string query = @"UPDATE Employees 
-                              SET FullName = @FullName, Department = @Department, 
-                                  Designation = @Designation, JoiningDate = @JoiningDate, Email = @Email
-                              WHERE EmployeeId = @EmployeeId";
-
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@FullName", emp.FullName);
-            command.Parameters.AddWithValue("@Department", emp.Department);
-            command.Parameters.AddWithValue("@Designation", emp.Designation);
-            command.Parameters.AddWithValue("@JoiningDate", emp.JoiningDate);
-            command.Parameters.AddWithValue("@Email", emp.Email);
-            command.Parameters.AddWithValue("@EmployeeId", id);
-
-            int rowsAffected = command.ExecuteNonQuery();
-
-            if (rowsAffected > 0)
-                Console.WriteLine("✅ Employee updated successfully!");
-            else
-                Console.WriteLine("❌ No employee found with that ID.");
+            var employee = await _repository.GetByIdAsync(id);
+            return employee == null ? null : _mapper.Map<EmployeeDto>(employee);
         }
 
-        public void DeleteEmployee(int id)
+        public async Task<EmployeeDto> CreateEmployeeAsync(CreateEmployeeDto dto)
         {
-            using var connection = DbConnection.GetConnection();
-            connection.Open();
+            var employee = _mapper.Map<Employee>(dto);
+            await _repository.AddAsync(employee);
+            await _repository.SaveChangesAsync();
+            return _mapper.Map<EmployeeDto>(employee);
+        }
 
-            string query = "DELETE FROM Employees WHERE EmployeeId = @EmployeeId";
+        public async Task<bool> UpdateEmployeeAsync(int id, CreateEmployeeDto dto)
+        {
+            var employee = await _repository.GetByIdAsync(id);
+            if (employee == null)
+                return false;
 
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@EmployeeId", id);
+            _mapper.Map(dto, employee);
+            await _repository.UpdateAsync(employee);
+            await _repository.SaveChangesAsync();
+            return true;
+        }
 
-            int rowsAffected = command.ExecuteNonQuery();
+        public async Task<bool> DeleteEmployeeAsync(int id)
+        {
+            var employee = await _repository.GetByIdAsync(id);
+            if (employee == null)
+                return false;
 
-            if (rowsAffected > 0)
-                Console.WriteLine("✅ Employee deleted successfully!");
-            else
-                Console.WriteLine("❌ No employee found with that ID.");
+            await _repository.DeleteAsync(employee);
+            await _repository.SaveChangesAsync();
+            return true;
         }
     }
 }

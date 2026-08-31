@@ -1,6 +1,6 @@
-namespace StaffSphere.Models
+namespace StaffSphere.DTOs
 {
-    public class Employee
+    public class EmployeeDto
     {
         public int EmployeeId { get; set; }
         public string FullName { get; set; } = string.Empty;
@@ -8,8 +8,5 @@ namespace StaffSphere.Models
         public string Designation { get; set; } = string.Empty;
         public DateTime JoiningDate { get; set; }
         public string Email { get; set; } = string.Empty;
-
-        // Navigation property — one employee can have many attendance records
-        public List<Attendance> Attendances { get; set; } = new();
     }
 }
